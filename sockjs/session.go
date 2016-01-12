@@ -11,13 +11,13 @@ type sessionState uint32
 
 const (
 	// brand new session, need to send "h" to receiver
-	SessionOpening sessionState = iota
+	sessionOpening sessionState = iota
 	// active session
-	SessionActive
+	sessionActive
 	// session being closed, sending "closeFrame" to receivers
-	SessionClosing
+	sessionClosing
 	// closed session, no activity at all, should be removed from handler completely and not reused
-	SessionClosed
+	sessionClosed
 )
 
 var (
@@ -84,7 +84,7 @@ func newSession(req *http.Request, sessionID string, sessionTimeoutInterval, hea
 func (s *session) sendMessage(msg string) error {
 	s.Lock()
 	defer s.Unlock()
-	if s.state > SessionActive {
+	if s.state > sessionActive {
 		return ErrSessionNotOpen
 	}
 	s.sendBuffer = append(s.sendBuffer, msg)
@@ -174,8 +174,8 @@ func (s *session) close() {
 	s.closing()
 	s.Lock()
 	defer s.Unlock()
-	if s.state < SessionClosed {
-		s.state = SessionClosed
+	if s.state < sessionClosed {
+		s.state = sessionClosed
 		s.timer.Stop()
 		close(s.closeCh)
 	}
@@ -186,7 +186,7 @@ func (s *session) closedNotify() <-chan struct{} { return s.closeCh }
 // Conn interface implementation
 func (s *session) Close(status uint32, reason string) error {
 	s.Lock()
-	if s.state < SessionClosing {
+	if s.state < sessionClosing {
 		s.closeFrame = closeFrame(status, reason)
 		s.Unlock()
 		s.closing()
