@@ -7,12 +7,11 @@ import (
 	"time"
 )
 
-// SessionState defines the current state of the session
-type SessionState uint32
+type sessionState uint32
 
 const (
 	// brand new session, need to send "h" to receiver
-	SessionOpening SessionState = iota
+	SessionOpening sessionState = iota
 	// active session
 	SessionActive
 	// session being closed, sending "closeFrame" to receivers
